@@ -28,6 +28,7 @@ namespace SagePayPEDTest
             transactionInfo = new TransactionInfo();
             tillInformation = new TillInformation();
             nonGuiTransactionHook = new NonGuiTransactionHook();
+            //default confirmation type
             confirmationType = NonGuiTransactionHook.NONGUITRANSACTION_CONFIRMTYPE.CONFIRMTYPE_AUTHORISED;
             
         }
@@ -40,9 +41,9 @@ namespace SagePayPEDTest
         /// <summary>
         /// Payment 
         /// </summary>
-        public DiagnosticErrMsg Pay(int amount)
+        public DiagnosticErrMsg Pay(int amount )
         {
-     
+
             int intAmount;
             DiagnosticErrMsg isSuccessful = DiagnosticErrMsg.OK;
 
@@ -56,15 +57,11 @@ namespace SagePayPEDTest
             {
                 throw new Exception("Error in Amount value");
             }
-          
-             Console.WriteLine($"Payment Valid Process amount: {intAmount}");
 
-             // Populate the till information object
-             tillInformation.MerchantName = "Sage Pay Ireland";
-             tillInformation.Address1 = "50-51 Patrick Street";
-             tillInformation.Address2 = "Dun Laoghaire";
-             tillInformation.Address3 = "Co Dublin";
-             tillInformation.PhoneNumber = "01-231177";
+            Console.WriteLine($"Valid payment amount: {intAmount}");
+
+            //add the address of the store for the reciept
+            AddAddress();
 
             //Use a non GUI transaction - if transaction is true proceed to the CardEnquiry stage.
             if (nonGuiTransactionHook.StartTransaction(ref tillInformation) == true)
@@ -86,12 +83,11 @@ namespace SagePayPEDTest
                         if (transactionInfo.DataEntryMethod == TransactionInfo.TRANSINFO_DATAENTRYMETHOD.TRANSINFO_DE_SWIPED)
                         {
 
-                            Console.WriteLine("Swipe transaction done- CANCEL the transaction.");
+                            Console.WriteLine("Swipe transaction - CANCEL the transaction.");
                             confirmationType = NonGuiTransactionHook.NONGUITRANSACTION_CONFIRMTYPE.CONFIRMTYPE_CANCELLED;
                             isSuccessful = DiagnosticErrMsg.NOTOK;
                         }
-                       
-           
+
 
                         // confirm the transaction
                         if (nonGuiTransactionHook.ConfirmTransaction(confirmationType,
@@ -99,7 +95,9 @@ namespace SagePayPEDTest
                                                                    transactionInfo.AuthorisationCode,
                                                                    ref transactionInfo) == true)
                         {
-                            Console.WriteLine("\nTransaction details....");
+
+                            
+                   
                             //display transactionInfo
                             Console.WriteLine("\nTransaction Information");
                             Console.WriteLine("-----------------------\n");
@@ -113,7 +111,7 @@ namespace SagePayPEDTest
                             Console.WriteLine($" Transaction Amount: {transactionInfo.TransactionAmount}");
                             Console.WriteLine($" Transaction Ref Number: {transactionInfo.TransactionRefNo.ToString()}");
                             Console.WriteLine($" TerminalId: {transactionInfo.TerminalId}");
-                  
+
 
                             //customer receipt
                             Console.WriteLine("\n\nCustomer Receipt");
@@ -123,18 +121,31 @@ namespace SagePayPEDTest
 
                         }
 
-                        
+
                     }
                 }
 
             }
 
-                    //end the transaction
-                    nonGuiTransactionHook.EndTransaction();
-                    Console.WriteLine("SagePay Driver Transaction Finished.....");
+            //end the transaction
+            nonGuiTransactionHook.EndTransaction();
+            Console.WriteLine("SagePay Driver Transaction Finished.....");
 
-                    return isSuccessful;
+            return isSuccessful;
 
-                }
+        }
+
+        private void AddAddress()
+        {
+            // Populate the till information object
+            tillInformation.MerchantName = "Acrelec";
+            tillInformation.Address1 = "East Wing , Focus 31";
+            tillInformation.Address2 = "Mark Road";
+            tillInformation.Address3 = "Hemel Hempstead";
+            tillInformation.Address4 = "HP2 7BW";
+            tillInformation.PhoneNumber = "1234567890";
+        }
+
+        private void Populate
     }
 }
